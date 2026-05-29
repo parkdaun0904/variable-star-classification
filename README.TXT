@@ -64,13 +64,20 @@ General Catalogue of Variable Stars.
 
 전통적인 변광성 카탈로그이며
 주기, 등급, 변광성 타입 등의 정보를 포함한다.
+You have to download dataset yourself.
+'http://www.sai.msu.su/gcvs/gcvs/gcvs5/htm/'
 
 [2] ASAS-SN
 
 All-Sky Automated Survey for Supernovae.
+You have to download dataset yourself.
+https://asas-sn.osu.edu/variables
 
 대량의 변광성 데이터를 포함하며
 class_probability 값이 낮은 데이터는 제외한다.
+
+
+
 
 현재 설정:
 
