@@ -1,48 +1,55 @@
-# GCVS 기반 변광성 머신러닝 분류 프로젝트
+# Variable Star Machine Learning Classification Project
 
-================================================================================================
-1. 프로젝트 목적
+========================================================================
 
----
+1. Project Overview
 
-이 프로젝트는 GCVS와 ASAS-SN 변광성 카탈로그 데이터를 이용해
-대표적인 변광성 타입을 머신러닝으로 분류하는 코드이다.
+This project classifies variable stars using a machine learning model trained on catalog-based variable star data.
 
-연구 전체 주제는 불규칙하거나 제한된 광도곡선 데이터에서
-전통적인 주기 분석 방법과 머신러닝 기반 분류 방법을 비교하는 것이다.
+The main research topic is:
 
-이 코드 묶음은 그중 머신러닝 분류 부분을 담당한다.
+"Performance Comparison between Traditional Period Analysis and Machine Learning-Based Variable Star Classification under Irregular Light Curve Data"
 
-모델은 다음과 같은 feature를 이용해 학습한다.
+The machine learning part of the research is implemented in Python.
 
-- period
-- mag_max
-- mag_min
-- mean_mag
-- amplitude
-- epoch
-- rise_time
-- mag_code
+The model does not directly classify light curve images. Instead, it uses numerical and categorical features extracted from variable star catalogs or observed light curve files.
 
-학습에는 Random Forest 모델을 사용하며,
-새로운 관측 대상에 대해 각 변광성 타입일 확률을 출력한다.
+Main features used by the model:
 
-또한 conclusion_lightcurves 폴더의 txt 광도곡선 파일을 읽어
-자동으로 feature를 추출하고 예측할 수 있다.
+* period
+* mag_max
+* mag_min
+* mean_mag
+* amplitude
+* epoch
+* rise_time
+* mag_code
 
-================================================================================================
-2. 전체 파일 구조
+The final classifier is based on a Random Forest model.
 
-코드 모음/
+The trained model predicts the probability that a new target belongs to each variable star class.
+
+========================================================================
+
+2. Project Folder Structure
+
+The project was developed using the following directory structure.
+
+Code Collection/
+│
 ├─ project/
 │  ├─ train_model.py
 │  ├─ predict_new.py
 │  ├─ gcvs_parser.py
 │  ├─ asassn_parser.py
 │  ├─ lightcurve_features.py
+│  ├─ lightcurve_mse.py
 │  ├─ ml_pipeline.py
 │  ├─ label_mapping.py
 │  ├─ config.py
+│  ├─ make_sample_new_data.py
+│  ├─ requirements.txt
+│  ├─ README.TXT
 │  ├─ gcvs5.txt
 │  └─ asassn_catalog_full.csv
 │
@@ -54,109 +61,372 @@
 ├─ results/
 └─ new_data/
 
-================================================================================================
+Folder Description
 
-3. 사용 데이터
+project/
+
+Contains all source code files and training datasets.
+
+This is the main working directory of the project.
+
+All Python scripts should be executed from inside this folder.
+
+conclusion_lightcurves/
+
+Contains observed light curve files used for final prediction.
+
+These files are not used for training.
+
+They are used only for prediction and evaluation.
+
+models/
+
+Stores trained machine learning models.
+
+Example:
+
+models/gcvs_asassn_random_forest.joblib
+
+results/
+
+Stores all training and prediction outputs.
+
+A new timestamped folder is automatically created whenever training or prediction is executed.
+
+new_data/
+
+Stores CSV files used for prediction.
+
+Example:
+
+new_data/sample_new_objects.csv
+
+Important
+
+The following files must exist inside the project folder before training:
+
+* gcvs5.txt
+* asassn_catalog_full.csv
+
+Expected structure:
+
+Code Collection/
+│
+├─ project/
+│  ├─ train_model.py
+│  ├─ gcvs5.txt
+│  └─ asassn_catalog_full.csv
+
+Do not place these datasets inside models/, results/, or other folders.
+
+The training scripts expect them to be located directly inside project/.
+
+========================================================================
+
+3. Required Datasets
 
 [1] GCVS
 
 General Catalogue of Variable Stars.
 
-전통적인 변광성 카탈로그이며
-주기, 등급, 변광성 타입 등의 정보를 포함한다.
-You have to download dataset yourself.
-'http://www.sai.msu.su/gcvs/gcvs/gcvs5/htm/'
+A traditional variable star catalog that contains information such as:
+
+* variable star name
+* variable type
+* period
+* magnitude
+* amplitude-related information
+
+Dataset page:
+
+http://www.sai.msu.su/gcvs/gcvs/gcvs5/htm/
+
+You must download this dataset yourself.
+
+Expected file name:
+
+gcvs5.txt
+
+The file must be placed directly inside the project folder.
 
 [2] ASAS-SN
 
 All-Sky Automated Survey for Supernovae.
-You have to download dataset yourself.
+
+A large catalog containing hundreds of thousands of variable stars.
+
+Dataset page:
+
 https://asas-sn.osu.edu/variables
 
-대량의 변광성 데이터를 포함하며
-class_probability 값이 낮은 데이터는 제외한다.
+You must download this dataset yourself.
 
+Expected file name:
 
+asassn_catalog_full.csv
 
+The file must be placed directly inside the project folder.
 
-현재 설정:
+To improve training quality, low-confidence classifications are removed.
+
+Current setting:
 
 ASASSN_MIN_CLASS_PROBABILITY = 0.5
 
-즉, 모델이 어느 정도 확신한 데이터만 학습에 사용한다.
+Only reasonably reliable classifications are used for training.
 
-================================================================================================
+========================================================================
 
-4. 현재 분류 대상
+4. Target Variable Star Classes
 
-현재 코드에서는 아래 6개 그룹만 사용한다.
+This project groups detailed catalog labels into six larger research classes.
 
-- RR_Lyrae
-- Cepheid
-- Eclipsing
-- Mira
-- SemiRegular
-- DeltaScuti
+The six target classes are:
 
-GCVS에는 훨씬 더 많은 세부 타입이 존재하지만,
-이번 연구에서는 대표적인 타입 위주로 단순화하였다.
+* RR_Lyrae
+* Cepheid
+* Eclipsing
+* Mira
+* SemiRegular
+* DeltaScuti
 
-================================================================================================
+Although GCVS and ASAS-SN contain many more detailed variable star types, using too many classes often reduces model stability and increases class imbalance.
 
-5. 학습 데이터 필터링 조건
+Therefore, detailed labels are simplified into these six major groups.
 
-다음 숫자 feature 중 최소 2개 이상 값이 있어야 학습에 사용한다.
+========================================================================
 
-- period
-- mag_max
-- mag_min
-- amplitude
-- epoch
-- rise_time
-또한 한 라벨의 데이터 수가 30개 미만이면 제외한다.
+5. Main File Descriptions
 
-이유:
-- 데이터가 너무 적으면 모델이 특징을 안정적으로 배우기 어려움
-- 테스트 결과가 크게 흔들릴 수 있음
+config.py
 
-================================================================================================
+Stores global project settings.
 
-6. 실행 방법
+Examples:
 
-[1] 모델 학습
+* dataset locations
+* model locations
+* result locations
+* feature lists
+* Random Forest settings
+* classification thresholds
+
+label_mapping.py
+
+Converts detailed catalog labels into the six research classes.
+
+Examples:
+
+RRAB -> RR_Lyrae
+
+EA -> Eclipsing
+
+DSCT -> DeltaScuti
+
+gcvs_parser.py
+
+Reads gcvs5.txt and converts it into a machine learning table format.
+
+Extracted information includes:
+
+* variable type
+* period
+* magnitude
+* amplitude
+* epoch
+* magnitude code
+
+asassn_parser.py
+
+Reads ASAS-SN data and converts it into the same format used by GCVS.
+
+This allows both datasets to be combined into a single training dataset.
+
+ml_pipeline.py
+
+Contains the machine learning pipeline.
+
+Functions include:
+
+* data filtering
+* missing value handling
+* categorical encoding
+* Random Forest construction
+* probability table generation
+
+train_model.py
+
+Main training script.
+
+Workflow:
+
+1. Read GCVS data
+2. Read ASAS-SN data
+3. Merge datasets
+4. Create training dataset
+5. Split training and test sets
+6. Train the Random Forest model
+7. Evaluate performance
+8. Save results and model files
+
+predict_new.py
+
+Predicts variable star classes for new targets.
+
+Supports:
+
+* CSV feature files
+* light curve TXT files
+
+Outputs Top 3 predicted classes and probabilities.
+
+lightcurve_features.py
+
+Converts observed light curve TXT files into machine learning features.
+
+Reads TARGET_INFO.TXT and extracts:
+
+* period
+* amplitude
+* filter information
+* phase information
+* observation statistics
+
+lightcurve_mse.py
+
+Calculates Mean Squared Error (MSE) between observed light curves and template light curves.
+
+MSE is calculated only when a valid period exists.
+
+make_sample_new_data.py
+
+Creates an example CSV file for testing the prediction pipeline.
+
+requirements.txt
+
+Lists required Python packages.
+
+========================================================================
+
+6. Installation
+
+Install all required packages:
+
+pip install -r requirements.txt
+
+Required packages:
+
+* numpy
+* pandas
+* scikit-learn
+* scipy
+* matplotlib
+* joblib
+
+========================================================================
+
+7. Model Training
+
+Run:
 
 python train_model.py
 
-생성 결과 예시:
+Before training, verify that the following files exist:
+
+* gcvs5.txt
+* asassn_catalog_full.csv
+
+ASAS-SN is optional.
+
+If ASAS-SN is unavailable, training can still proceed using only GCVS data.
+
+However, using both datasets is strongly recommended because it significantly increases the amount of training data.
+
+Training outputs:
 
 models/gcvs_asassn_random_forest.joblib
 
-results/날짜시간/
+results/YYYY-MM-DD_HH-MM-SS/
 ├─ parsed_gcvs_asassn_all.csv
 ├─ training_dataset_grouped.csv
+├─ label_counts.csv
 ├─ classification_report.txt
 ├─ confusion_matrix.csv
 ├─ confusion_matrix.png
 └─ test_prediction_top3.csv
 
-[2] CSV 파일 예측
+========================================================================
+
+8. Why Training and Test Sets Are Separated
+
+The dataset is divided into:
+
+* 80% training data
+* 20% test data
+
+Training data teaches the model.
+
+Test data evaluates how well the model performs on data that it has never seen before.
+
+This provides a more objective measurement of model performance.
+
+========================================================================
+
+9. Why Random Forest Was Used
+
+Random Forest was selected because it performs well on structured astronomical catalog data.
+
+Advantages include:
+
+* Works well with tabular feature data
+* Handles nonlinear relationships between variables
+* Robust against missing values
+* Stable performance on large datasets
+* Produces probability-based classifications
+* Easy to interpret compared to deep learning models
+
+This project focuses on feature-based classification rather than image-based classification.
+
+========================================================================
+
+10. Prediction Using CSV Files
+
+Example:
 
 python predict_new.py --input ../new_data/sample_new_objects.csv
 
-[3] txt 광도곡선 폴더 예측
+The CSV file should contain machine learning features such as:
+
+* period
+* amplitude
+* mag_max
+* mag_min
+* mean_mag
+
+The model will output Top 3 predicted classes and probabilities.
+
+========================================================================
+
+11. Prediction Using Light Curve TXT Files
+
+Example:
 
 python predict_new.py --folder ../conclusion_lightcurves
 
-================================================================================================
+The folder must contain:
 
-7. conclusion_lightcurves 사용 방법
+* TARGET_INFO.TXT
+* one or more TXT light curve files
 
-conclusion_lightcurves 안에는 다음 파일들을 넣는다.
+The prediction pipeline automatically extracts features from the light curves and performs classification.
 
-- TARGET_INFO.TXT
-- 광도곡선 txt 파일들
+========================================================================
 
-예시:
+12. TARGET_INFO.TXT Format
+
+Every prediction folder should contain a TARGET_INFO.TXT file.
+
+Example:
 
 object_name=V799 Aur
 expected_type=
@@ -167,121 +437,138 @@ time_column=1
 mag_column=2
 error_column=3
 
-brightness_mode 설명:
+Parameter Description
 
-differential_mag
+object_name
 
-차등등급 또는 상대 밝기값.
+Target object name.
 
-이 경우:
+expected_type
 
-- mag_max
-- mag_min
-- mean_mag
+Optional reference label.
 
-값은 사용하지 않고 amplitude 중심으로 예측한다.
+period
 
-================================================================================================
+Known period of the target.
 
-8. 자동 주기 추정
+If empty, period-dependent calculations may be skipped.
 
-txt 광도곡선 예측 시
-period 값이 비어 있으면 Lomb-Scargle 기반으로 자동 추정한다.
+brightness_mode
 
-생성 파일:
+Supported values:
 
-period_candidates.csv
+* differential_mag
+* apparent_mag
 
-예시:
+Most student observations use differential_mag.
 
-rank,period,power
-1,0.07597,0.82
-2,0.15190,0.61
+filters
 
-현재 관측 데이터에서 가장 가능성이 높은 주기 후보를 의미한다.
+Photometric filters to use.
 
-================================================================================================
+Examples:
 
-9. 위상(Phase) 정보
+V
 
-광도곡선 txt 예측 시
-추정된 period와 epoch를 이용해 위상 범위도 계산한다.
+B,V,R
 
-예시:
+all
 
-phase_text = 0.132 ~ 0.287
+time_column
 
-의미:
+Column number containing observation time.
 
-전체 주기를 0~1로 정규화했을 때
-현재 관측 데이터는 약 13.2% ~ 28.7% 구간을 관측했다는 뜻이다.
+mag_column
 
-즉:
-- phase_span이 작으면 전체 주기의 일부만 관측한 상태
-- phase_span이 크면 더 넓은 주기 구간을 관측한 상태
+Column number containing magnitude values.
 
-================================================================================================
+error_column
 
-10. 예측 결과 해석
+Column number containing magnitude uncertainty values.
 
-출력 예:
+========================================================================
 
-top1_label
-top1_prob
-top2_label
-top2_prob
-top3_label
-top3_prob
+13. MSE Calculation
 
-예:
+The project can compare observed light curves with representative template light curves using Mean Squared Error (MSE).
 
-top1_label = DeltaScuti
-top1_percent = 86.48%
+Requirements:
 
-의미:
+* valid period
+* sufficient observations
+* successful phase folding
 
-모델이 해당 데이터를 Delta Scuti형일 가능성이 가장 높다고 판단했다는 뜻이다.
+If period is missing, invalid, or empty, MSE is not calculated.
 
-================================================================================================
+MSE is used only as a supplementary comparison metric.
 
-11. 같은 대상에 대한 결과 통합
+Classification probability remains the primary result.
 
-같은 대상(object_name)에 대한 여러 txt 파일이 존재할 경우
-각 파일별 결과뿐 아니라 전체 경향도 비교 가능하다.
+========================================================================
 
-예:
-- B/V/R/I 필터별 결과 비교
-- 날짜별 예측 안정성 비교
-- 특정 필터에서의 혼동 경향 확인
+14. Research Background
 
-현재 V799 Aur 데이터에서는 대부분 DeltaScuti로 안정적으로 분류되었으며,
-일부 구간에서는 Eclipsing 또는 RR_Lyrae와 부분적으로 혼동되는 결과가 나타났다.
+This project was developed for the 2026 College of Natural Sciences Research Festival.
 
-이는:
-- 관측 구간 부족
-- 짧은 주기 변광성 간 feature overlap
-- differential magnitude 사용
-등의 이유 때문일 수 있다.
+The goal of the research is to compare:
 
-================================================================================================
+1. Traditional Lomb-Scargle Period Analysis (LSP)
+2. Machine Learning-Based Variable Star Classification
 
-12. 현재 코드의 한계
+under irregular observational conditions.
 
-이 코드는 광도곡선 이미지를 직접 넣어 CNN처럼 분류하는 구조가 아니다.
+The research investigates whether machine learning can maintain stable classification performance when observation quality becomes poor or data are incomplete.
 
-현재 구조:
+Training data were collected from:
 
-광도곡선
-    > feature 추출
-    > 머신러닝 모델 입력
-    > 변광성 타입 확률 출력
+* GCVS
+* ASAS-SN
 
-즉, feature 기반 머신러닝 모델이다.
+After preprocessing and filtering, approximately 450,000 variable star samples were used for training.
 
-================================================================================================
+========================================================================
 
-13. 참고
+15. Current Limitations
 
-tempCodeRunnerFile.py는 VS Code 실행 중 생성되는 임시 파일일 가능성이 크다.
+This project does not directly classify light curve images.
 
-프로젝트 핵심 파일은 아니므로 제출용에서는 제외 가능하다.
+Current workflow:
+
+Light Curve
+-> Feature Extraction
+-> Machine Learning Model
+-> Variable Star Classification
+
+The model relies on extracted features rather than complete light curve morphology.
+
+Performance may decrease when:
+
+* period information is unavailable
+* observation coverage is limited
+* multiple variable star types share similar feature values
+
+========================================================================
+
+16. Future Work
+
+Possible future improvements include:
+
+* Additional Cepheid and Delta Scuti training data
+* More variable star classes
+* CNN-based light curve image classification
+* Deep learning time-series models
+* Improved automatic period estimation
+* Multi-filter light curve analysis
+
+========================================================================
+
+17. Citation
+
+If you use this project in research, presentations, or educational work, please cite the original project and the source catalogs:
+
+* GCVS
+* ASAS-SN
+
+Please also acknowledge the 2026 College of Natural Sciences Research Festival research project that motivated this work.
+
+========================================================================
