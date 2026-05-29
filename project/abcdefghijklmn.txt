@@ -1,0 +1,79 @@
+PS C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project> python train_model.py                 
+======================================================================
+[1] GCVS + ASAS-SN 파일 읽기
+GCVS 파일: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\gcvs5.txt
+ASAS-SN 파일: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\asassn_catalog_full.csv
+전체 파싱 데이터 수: 470,385
+저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43\parsed_gcvs_asassn_all.csv
+
+데이터 출처별 개수:
+source
+ASASSN    408164
+GCVS       62221
+
+======================================================================
+[2] 학습 데이터 생성
+학습 사용 데이터 수: 453,608
+저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43\training_dataset_grouped.csv
+
+라벨별 데이터 수:
+- Cepheid     : 4,380
+- DeltaScuti  : 10,057
+- Eclipsing   : 162,323
+- Mira        : 20,342
+- RR_Lyrae    : 55,641
+- SemiRegular : 200,865
+
+======================================================================
+[3] 학습 데이터 / 테스트 데이터 분리
+학습 데이터: 362,886
+테스트 데이터: 90,722
+설명: 테스트 데이터는 모델이 학습 중에 보지 않은 데이터로, 성능 확인에 사용
+
+======================================================================
+[4] Random Forest 모델 학습
+모델 저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\models\gcvs_asassn_random_forest.joblib
+
+======================================================================
+[5] 테스트 데이터로 성능 평가
+
+[Classification Report]
+              precision    recall  f1-score   support
+
+     Cepheid     0.6462    0.3961    0.4912       876
+  DeltaScuti     0.9463    0.9906    0.9679      2011
+   Eclipsing     0.8846    0.9320    0.9077     32465
+        Mira     0.8803    0.9705    0.9232      4069
+    RR_Lyrae     0.8170    0.7016    0.7549     11128
+ SemiRegular     0.9871    0.9787    0.9829     40173
+
+    accuracy                         0.9223     90722
+   macro avg     0.8602    0.8283    0.8380     90722
+weighted avg     0.9206    0.9223    0.9203     90722
+
+평가 리포트 저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43\classification_report.txt
+Confusion Matrix CSV 저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43\confusion_matrix.csv
+Confusion Matrix 그림 저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43\confusion_matrix.png
+
+======================================================================
+[6] 테스트 데이터 예측 확률 Top 3 저장
+테스트 예측 Top 3 저장: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43\test_prediction_top3.csv
+
+테스트 예측 예시 10개:
+                        name  true_label  top1_label top1_percent  top2_label top2_percent  top3_label top3_percent other_percent
+ASASSN-V J182030.52-410328.1 SemiRegular SemiRegular       93.21%   Eclipsing        3.16%  DeltaScuti        1.46%         2.17%
+ASASSN-V J004712.32+361339.5   Eclipsing   Eclipsing       87.21%     Cepheid        5.36% SemiRegular        3.80%         3.63%
+ASASSN-V J144547.42-263414.1 SemiRegular SemiRegular       90.10%   Eclipsing        3.98%     Cepheid        2.96%         2.96%
+ASASSN-V J185641.54+155108.2   Eclipsing   Eclipsing       84.13%     Cepheid        6.48% SemiRegular        4.85%         4.54%
+ASASSN-V J085838.14-295127.5   Eclipsing   Eclipsing       50.62% SemiRegular       41.13%     Cepheid        5.30%         2.96%
+ASASSN-V J180227.56+023034.7        Mira        Mira       97.96% SemiRegular        1.11%    RR_Lyrae        0.33%         0.60%
+ASASSN-V J222413.79-243944.4    RR_Lyrae    RR_Lyrae       92.97%   Eclipsing        4.63% SemiRegular        0.83%         1.57%
+ASASSN-V J213805.07+552803.3   Eclipsing   Eclipsing       69.18%     Cepheid       20.14% SemiRegular        5.85%         4.83%
+ASASSN-V J202446.57+054159.1    RR_Lyrae   Eclipsing       82.23%    RR_Lyrae       10.08% SemiRegular        3.31%         4.37%
+ASASSN-V J174030.73-131931.9 SemiRegular SemiRegular       88.70%   Eclipsing        5.24%     Cepheid        3.12%         2.94%
+
+======================================================================
+[완료]
+결과 폴더: C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project\results\2026-05-27_22-39-43
+======================================================================
+PS C:\Users\User\Desktop\26-1 자연대 학술제\코드 모음\project> 
